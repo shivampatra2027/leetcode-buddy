@@ -1,2 +1,3 @@
-# leetcode-buddy
-Leetcode extension using WXT
+# WXT + React
+
+This template should help get you started developing with React in WXT.
