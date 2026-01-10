@@ -1,7 +1,7 @@
 // apps/backend/src/server.ts
 import express from "express";
 import cors from "cors";
-import { scrapeLeetCodeProfile } from "./scraper.js";
+import { scrapeLeetCodeProfile } from "./scrapper.js";
 
 const app = express();
 app.use(cors());
