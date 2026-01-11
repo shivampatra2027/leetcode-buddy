@@ -1,6 +1,5 @@
-
 import { CartesianGrid, Line, LineChart, XAxis, Customized } from "recharts";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -15,7 +14,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, ArrowLeft } from "lucide-react";
+import { profileAPI } from '@/services/api';
 
 const chartData = [
   { month: "January", desktop: 345, mobile: 210 },
@@ -49,19 +49,19 @@ export function PartialLineChart() {
   });
 
   return (
-    <Card>
+    <Card className="bg-[#161b22] border-[#30363d] shadow-lg">
       <CardHeader>
-        <CardTitle>
-          Partial Line Chart
+        <CardTitle className="text-white text-xl">
+          Monthly Progress Comparison
           <Badge
             variant="outline"
-            className="text-green-500 bg-green-500/10 border-none ml-2"
+            className="text-green-400 bg-green-500/10 border-green-500/30 ml-2"
           >
             <TrendingUp className="h-4 w-4" />
-            <span>5.2%</span>
+            <span>Live Data</span>
           </Badge>
         </CardTitle>
-        <CardDescription>January - June 2025</CardDescription>
+        <CardDescription className="text-[#8b949e] text-base">Problems solved over time</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer className="h-54 w-full" config={chartConfig}>
@@ -239,24 +239,170 @@ interface ChartProps {
   onBack: () => void;
 }
 
+interface UserStats {
+  username: string;
+  solved: number;
+  easy: number;
+  medium: number;
+  hard: number;
+  ranking: number;
+}
+
 export default function Chart({ user1, user2, onBack }: ChartProps) {
+  const [profile1, setProfile1] = useState<UserStats | null>(null);
+  const [profile2, setProfile2] = useState<UserStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        setLoading(true);
+        const [data1, data2] = await Promise.all([
+          profileAPI.getProfile(user1),
+          profileAPI.getProfile(user2)
+        ]);
+        setProfile1(data1);
+        setProfile2(data2);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch profiles');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfiles();
+  }, [user1, user2]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-[#58a6ff] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-sm text-[#8b949e]">Loading profiles...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !profile1 || !profile2) {
+    return (
+      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="text-red-400 mb-3 text-3xl">⚠️</div>
+          <p className="text-sm text-red-400 mb-4">{error || 'Failed to load profiles'}</p>
+          <button
+            onClick={onBack}
+            className="px-4 py-2 text-sm bg-[#238636] hover:bg-[#2ea043] text-white rounded-md transition-colors font-medium"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen bg-[#0d1117] overflow-y-auto p-4">
+    <div className="min-h-screen bg-[#0d1117] overflow-y-auto p-3">
       <button
         onClick={onBack}
-        className="mb-4 flex items-center gap-2 text-[#8b949e] hover:text-[#58a6ff] transition-colors text-sm"
+        className="mb-3 flex items-center gap-2 text-[#8b949e] hover:text-[#58a6ff] transition-colors text-sm"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ArrowLeft className="w-4 h-4" />
         Back
       </button>
       
       <div className="text-center mb-4">
-        <h2 className="text-lg font-bold text-white">
+        <h2 className="text-lg font-bold text-white mb-1">
           {user1} vs {user2}
         </h2>
-        <p className="text-sm text-[#8b949e]">Comparison Chart</p>
+        <p className="text-xs text-[#8b949e]">LeetCode Profile Comparison</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-3">
+          <div className="mb-2">
+            <div className="text-sm font-bold text-white mb-1">{profile1.username}</div>
+            <div className="text-xs text-[#8b949e] bg-[#21262d] px-2 py-0.5 rounded inline-block">
+              Rank #{profile1.ranking.toLocaleString()}
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-[#238636] mb-1">{profile1.solved}</div>
+          <div className="text-xs text-[#8b949e] mb-3">problems solved</div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#3fb950]"></div>
+                <span className="text-xs text-[#c9d1d9]">Easy</span>
+              </div>
+              <span className="text-sm font-bold text-[#3fb950]">{profile1.easy}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#d29922]"></div>
+                <span className="text-xs text-[#c9d1d9]">Medium</span>
+              </div>
+              <span className="text-sm font-bold text-[#d29922]">{profile1.medium}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#f85149]"></div>
+                <span className="text-xs text-[#c9d1d9]">Hard</span>
+              </div>
+              <span className="text-sm font-bold text-[#f85149]">{profile1.hard}</span>
+            </div>
+          </div>
+          <div className="mt-3 pt-3 border-t border-[#30363d]">
+            <div className="flex justify-between text-xs">
+              <span className="text-[#8b949e]">Acceptance:</span>
+              <span className="font-bold text-[#58a6ff]">
+                {((profile1.solved / (profile1.easy + profile1.medium + profile1.hard)) * 100).toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-3">
+          <div className="mb-2">
+            <div className="text-sm font-bold text-white mb-1">{profile2.username}</div>
+            <div className="text-xs text-[#8b949e] bg-[#21262d] px-2 py-0.5 rounded inline-block">
+              Rank #{profile2.ranking.toLocaleString()}
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-[#1f6feb] mb-1">{profile2.solved}</div>
+          <div className="text-xs text-[#8b949e] mb-3">problems solved</div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#3fb950]"></div>
+                <span className="text-xs text-[#c9d1d9]">Easy</span>
+              </div>
+              <span className="text-sm font-bold text-[#3fb950]">{profile2.easy}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#d29922]"></div>
+                <span className="text-xs text-[#c9d1d9]">Medium</span>
+              </div>
+              <span className="text-sm font-bold text-[#d29922]">{profile2.medium}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#f85149]"></div>
+                <span className="text-xs text-[#c9d1d9]">Hard</span>
+              </div>
+              <span className="text-sm font-bold text-[#f85149]">{profile2.hard}</span>
+            </div>
+          </div>
+          <div className="mt-3 pt-3 border-t border-[#30363d]">
+            <div className="flex justify-between text-xs">
+              <span className="text-[#8b949e]">Acceptance:</span>
+              <span className="font-bold text-[#58a6ff]">
+                {((profile2.solved / (profile2.easy + profile2.medium + profile2.hard)) * 100).toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <PartialLineChart />

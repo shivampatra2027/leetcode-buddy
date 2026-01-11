@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { profileAPI } from '@/services/api';
 
 interface ProfileInputProps {
   onCompare: (user1: string, user2: string) => void;
@@ -7,11 +8,28 @@ interface ProfileInputProps {
 export default function ProfileInput({ onCompare }: ProfileInputProps) {
   const [user1, setUser1] = useState('');
   const [user2, setUser2] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (user1 && user2) {
+    if (!user1 || !user2) return;
+    
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Validate both usernames exist
+      await Promise.all([
+        profileAPI.getProfile(user1),
+        profileAPI.getProfile(user2)
+      ]);
+      
       onCompare(user1, user2);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch profiles. Please check usernames.');
+    } finally {
+      setLoading(false);
     }
   };
 

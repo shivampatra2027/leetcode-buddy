@@ -1,44 +1,88 @@
-// apps/backend/src/server.ts
 import express from "express";
 import cors from "cors";
-import { scrapeLeetCodeProfile } from "./scrapper.js";
+import session from "express-session";
+import passport from "passport";
+import { config } from "./config/config.route.js";
+import { setupPassport } from "./auth/passport.route.js";
+import authRoutes from "./routes/auth.route.js";
+import leetcodeRoutes from "./routes/leetcode.route.js";
+import profileRoutes from "./routes/profile.route.js";
+import historyRoutes from "./routes/history.route.js";
+import chartRoutes from "./routes/chart.route.js";
 
 const app = express();
-app.use(cors());
+
+const allowedOrigins = config.nodeEnv === 'production'
+  ? [config.frontendUrl] // Only allow specific frontend in production
+  : ['http://localhost:3000', 'http://localhost:5173', 'chrome-extension://*'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    
+    if (config.nodeEnv === 'development') {
+      return callback(null, true);
+    }
+    
+    if (allowedOrigins.some(allowed => origin.startsWith(allowed.replace('*', '')))) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 
-interface LeetCodeStats {
-  username: string;
-  solved: number;
-  streak: number;
-  acceptanceRate: number;
-  easy: number;
-  medium: number;
-  hard: number;
-}
+app.use(session({
+  secret: config.sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: config.nodeEnv === 'production',
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  },
+}));
 
-app.post("/api/compare", async (req, res) => {
-  const { username1, username2 } = req.body;
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+setupPassport();
 
-  try {
-    const [user1, user2] = await Promise.all([
-      scrapeLeetCodeProfile(username1),
-      scrapeLeetCodeProfile(username2)
-    ]);
+// Routes
+app.use('/auth', authRoutes);
+app.use('/api', leetcodeRoutes);
+app.use('/api', profileRoutes);
+app.use('/api', historyRoutes);
+app.use('/api', chartRoutes);
 
-    const comparison = {
-      user1,
-      user2,
-      winner: user1.solved > user2.solved ? username1 : username2,
-      difference: Math.abs(user1.solved - user2.solved)
-    };
-
-    res.json(comparison);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch profiles" });
-  }
+app.get('/', (req, res) => {
+  res.json({
+    message: 'LeetCode Buddy API',
+    version: '1.0.0',
+    endpoints: {
+      auth: {
+        google: '/auth/google',
+        user: '/auth/user (protected)',
+        logout: '/auth/logout',
+        health: '/auth/health',
+        profile: '/api/profile/:username',
+        chartData: '/api/chart-data?user1=x&user2=y',
+        history: '/api/history (protected)',
+        saveHistory: 'POST /api/history (protected)',
+        deleteHistory: 'DELETE /api/history/:id (protected)',
+        clearHistory: 'DELETE /api/history (protected)',
+      },
+      api: {
+        compare: '/api/compare (protected)',
+      },
+    },
+  });
 });
 
-app.listen(3001, () => {
-  console.log("LeetBuddy API: http://localhost:3000");
+app.listen(config.port, () => {
+  console.log(`LeetCode Buddy API running on http://localhost:${config.port}`);
+  console.log(`Environment: ${config.nodeEnv}`);
+  console.log(`Google OAuth: ${config.googleClientId ? 'Configured' : 'Not configured'}`);
 });

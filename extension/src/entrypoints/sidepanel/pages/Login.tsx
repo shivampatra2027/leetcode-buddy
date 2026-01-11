@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -7,16 +8,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { authAPI } from '@/services/api';
 
 interface LoginProps {
   onLogin: () => void;
 }
 
 export default function Login({ onLogin }: LoginProps) {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await authAPI.loginWithGoogle();
+      onLogin();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Authentication failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSkip = () => {
     onLogin();
   };
 
@@ -24,45 +40,36 @@ export default function Login({ onLogin }: LoginProps) {
     <div className="h-screen bg-[#0d1117] flex items-center justify-center p-4">
       <Card className="w-full max-w-sm bg-[#161b22] border-[#30363d] text-white">
         <CardHeader>
-          <CardTitle className="text-white">Login to your account</CardTitle>
+          <CardTitle className="text-white">LeetCode Buddy</CardTitle>
           <CardDescription className="text-[#8b949e]">
-            Enter your email below to login to your account
+            Compare LeetCode profiles and track progress
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email" className="text-[#c9d1d9]">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  className="bg-[#0d1117] border-[#30363d] text-white placeholder:text-[#6e7681] focus-visible:ring-[#58a6ff]"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password" className="text-[#c9d1d9]">Password</Label>
-                  {/* <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline text-[#58a6ff]"
-                  >
-                    Forgot your password?
-                  </a> */}
-                </div>
-                <Input id="password" type="password" className="bg-[#0d1117] border-[#30363d] text-white placeholder:text-[#6e7681] focus-visible:ring-[#58a6ff]" required />
-              </div>
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded text-red-400 text-sm">
+              {error}
             </div>
-          </form>
+          )}
+          <p className="text-[#8b949e] text-sm text-center mb-4">
+            Sign in with your Google account to save comparison history
+          </p>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full bg-[#ffffff] hover:bg-[#b2b2b2] text-black" onClick={(e) => { e.preventDefault(); onLogin(); }}>
-            Login
+          <Button 
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full bg-[#ffffff] hover:bg-[#b2b2b2] text-black"
+          >
+            {loading ? 'Authenticating...' : 'Login with Google'}
           </Button>
-          <Button variant="outline" className="w-full bg-[#000000] text-[#ffffff] hover:bg-[#21262d] hover:text-white">
-            Login with Google
+          <Button 
+            variant="outline" 
+            onClick={handleSkip}
+            disabled={loading}
+            className="w-full bg-transparent border-[#30363d] text-[#8b949e] hover:bg-[#21262d] hover:text-white"
+          >
+            Continue without login
           </Button>
         </CardFooter>
       </Card>
