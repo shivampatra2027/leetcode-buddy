@@ -2,6 +2,8 @@
 
 A Chrome extension that lets you compare LeetCode profiles side-by-side with detailed statistics, difficulty breakdowns, and visual charts.
 
+![LeetCode Buddy Screenshot](/extension/assets/sc1.jpg)
+
 ## Features
 
 - **Profile Comparison**: Compare two LeetCode users side-by-side
