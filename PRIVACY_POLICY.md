@@ -9,6 +9,7 @@ LeetCode Buddy ("we", "our", or "the extension") is a Chrome extension that allo
 ## Information We Collect
 
 ### 1. Authentication Information
+
 - **Google Account Data**: When you choose to sign in with Google, we collect:
   - Your email address
   - Your name
@@ -16,6 +17,7 @@ LeetCode Buddy ("we", "our", or "the extension") is a Chrome extension that allo
 - **JWT Tokens**: We store authentication tokens to maintain your login session
 
 ### 2. LeetCode Profile Data
+
 - **Public LeetCode Statistics**: We fetch publicly available information from LeetCode profiles you choose to compare, including:
   - Username
   - Total problems solved
@@ -24,10 +26,12 @@ LeetCode Buddy ("we", "our", or "the extension") is a Chrome extension that allo
   - Acceptance rates
 
 ### 3. Usage Data
+
 - **Comparison History**: Usernames you've compared (stored locally in your browser)
 - **Search History**: Profile searches you've performed
 
 ### 4. Local Storage
+
 - Authentication tokens
 - User preferences
 - Cached profile data
@@ -35,6 +39,7 @@ LeetCode Buddy ("we", "our", or "the extension") is a Chrome extension that allo
 ## How We Use Your Information
 
 We use the collected information to:
+
 - Authenticate your identity via Google OAuth 2.0
 - Fetch and display LeetCode profile statistics
 - Compare multiple LeetCode profiles side-by-side
@@ -44,11 +49,13 @@ We use the collected information to:
 ## Data Storage and Security
 
 ### Local Storage
+
 - Authentication tokens are stored securely in Chrome's local storage
 - Profile comparison history is stored locally on your device
 - No sensitive data is transmitted without encryption
 
 ### Backend Storage
+
 - We use JWT (JSON Web Tokens) for secure authentication
 - User sessions are managed through secure, HTTP-only cookies
 - All API communications use HTTPS encryption
@@ -56,16 +63,19 @@ We use the collected information to:
 ## Third-Party Services
 
 ### Google OAuth 2.0
+
 - We use Google's authentication service for secure login
 - Google's privacy policy applies: https://policies.google.com/privacy
 - We only request necessary permissions (email, profile)
 
 ### LeetCode
+
 - We fetch publicly available data from LeetCode profiles
 - No private LeetCode data is accessed
 - We do not store your LeetCode credentials
 
 ### Hosting
+
 - Backend API is hosted on Vercel
 - Vercel's privacy policy applies: https://vercel.com/legal/privacy-policy
 
@@ -83,12 +93,14 @@ The extension requires the following Chrome permissions:
 ## Data Sharing
 
 We do NOT:
+
 - Sell your personal information to third parties
 - Share your data with advertisers
 - Use your data for marketing purposes
 - Track your browsing activity outside the extension
 
 We may share data only in these circumstances:
+
 - With your explicit consent
 - To comply with legal obligations
 - To protect our rights and prevent fraud
@@ -96,6 +108,7 @@ We may share data only in these circumstances:
 ## Your Rights
 
 You have the right to:
+
 - **Access**: View what data we have about you
 - **Delete**: Request deletion of your account and associated data
 - **Opt-out**: Use the extension without authentication (guest mode)
@@ -106,6 +119,7 @@ To exercise these rights, contact us at the email provided below.
 ## Guest Mode
 
 You can use LeetCode Buddy without signing in:
+
 - Click "Skip" on the login page
 - All functionality works without authentication
 - Data is stored only locally on your device
@@ -128,22 +142,20 @@ We may update this privacy policy from time to time. Changes will be posted on t
 ## Open Source
 
 LeetCode Buddy is open source. You can review our code at:
-- GitHub Repository: [Your Repository URL]
+
+- GitHub Repository: https://github.com/mdsahilnoob/leetcode-buddy
 
 ## Contact Us
 
 If you have questions or concerns about this privacy policy or our data practices, please contact us at:
 
-- **Email**: [Your Contact Email]
-- **GitHub Issues**: [Your Repository Issues URL]
+- **Email**: mds603052@gmail.com
+- **GitHub Issues**: https://github.com/mdsahilnoob/leetcode-buddy/issues
 
 ## Compliance
 
 This extension complies with:
+
 - Chrome Web Store Developer Program Policies
 - General Data Protection Regulation (GDPR)
 - California Consumer Privacy Act (CCPA)
-
-## User Consent
-
-By installing and using LeetCode Buddy, you consent to the collection and use of information as described in this privacy policy.
