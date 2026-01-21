@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'https://leetcode-buddy-z74p.vercel.app';
 
 const getToken = async (): Promise<string | null> => {
   if (typeof chrome !== 'undefined' && chrome.storage) {
